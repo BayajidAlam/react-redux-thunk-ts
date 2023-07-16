@@ -6,24 +6,36 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
+import { useAppDispatch } from '@/redux/hook';
+import { loginUser } from '@/redux/features/user/userSlice';
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
+
+interface LoginFormInputs {
+  email: string;
+  password: string;
+}
 
 export function LoginForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-  async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault();
-    setIsLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormInputs>();
 
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  }
+  const dispatch = useAppDispatch();
+
+  const onSubmit = (data: LoginFormInputs) => {
+    console.log(data);
+    dispatch(loginUser({ email: data.email, password: data.password }));
+  };
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-2">
           <div className="grid gap-1">
             <Label className="sr-only" htmlFor="email">
@@ -33,6 +45,7 @@ export function LoginForm({ className, ...props }: UserAuthFormProps) {
               id="email"
               placeholder="name@example.com"
               type="email"
+              {...register('email')}
               autoCapitalize="none"
               autoComplete="email"
               autoCorrect="off"
@@ -42,6 +55,7 @@ export function LoginForm({ className, ...props }: UserAuthFormProps) {
               id="password"
               placeholder="your password"
               type="password"
+              {...register('password')}
               autoCapitalize="none"
               autoComplete="password"
               disabled={isLoading}
